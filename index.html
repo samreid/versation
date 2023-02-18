@@ -1,0 +1,52 @@
+<html>
+<body></body>
+<script>
+
+  var SpeechRecognition = SpeechRecognition ||
+                          webkitSpeechRecognition;
+
+  const recognition = new SpeechRecognition();
+
+  const speak = ( text ) => {
+    const voices = synth.getVoices();
+
+    const utterance = new SpeechSynthesisUtterance( text );
+    utterance.voice = voices[ 7 ];
+    synth.speak( utterance );
+
+    utterance.onend = () => {
+      recognition.start();
+    };
+  };
+
+  const synth = window.speechSynthesis;
+  synth.getVoices();
+
+
+  recognition.onresult = async ( event ) => {
+
+    const message = event.results[ 0 ][ 0 ].transcript;
+    console.log( 'I heard: ' + message );
+
+    const response = await fetch( 'http://localhost:8080/post', {
+      method: 'POST',
+      body: message
+    } );
+    const text = await response.text();
+
+    console.log( 'Response: ' + text );
+
+    speak( text );
+
+  };
+
+
+  document.body.onclick = () => {
+
+    recognition.start();
+    // speak( 'Testing a second time' );
+
+  };
+
+</script>
+</html>
